@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Coretalk</title>
+</head>
+<body>
+  <script>
+
+function genHexString(len) {
+    const hex = '0123456789ABCDEF';
+    let output = '';
+    for (let i = 0; i < len; ++i) {
+        output += hex.charAt(Math.floor(Math.random() * hex.length));
+    }
+    return output;
+}
+
+class 間Object {
+  constructor(id, runtime) {
+    this.id = id;
+    this.claims = new Map();
+    this.wishHandlers = new Map();
+    this.runtime = runtime;
+  }
+
+  claim(key, value) {
+    this.claims.set(key, value);
+  }
+
+  handleWish(patternFn, handler) {
+    this.wishHandlers.set(patternFn, {patternFn, handler});
+  }
+
+  receiveWish(sender, wish) {
+    this.wishHandlers.forEach(({patternFn, handler}) => {
+      if (patternFn(wish)) {
+        console.log(`${this.id} received a wish from ${sender.id}`);
+        handler(this, wish);
+      }
+    });
+  }
+
+  wish(patternFn, wish, data) {
+    this.runtime.broadcastWish(this, patternFn, wish, data);
+  }
+}
+
+class Runtime {
+  constructor() {
+    this.objects = new Map();
+    this.whens = [];
+    this.wishQueue = [];
+  }
+
+  createObject(program=Function.prototype) {
+    const id = genHexString(16);
+    const obj = new 間Object(id, this);
+    this.objects.set(id, obj);
+    program(obj, this);
+    return obj;
+  }
+
+  when(condition, action) {
+    this.whens.push({ condition, action });
+  }
+
+  broadcastWish(sender, patternFn, wish) {
+    this.wishQueue.push({sender, patternFn, wish});
+  }
+
+  evaluateWishes() {
+    while (this.wishQueue.length) {
+      const {sender, patternFn, wish} = this.wishQueue.pop();
+      this.objects.forEach(obj => {
+        if (patternFn(obj)) {
+          obj.receiveWish(sender, wish);
+          // In a real implementation, this would be more sophisticated
+          console.log(`Object ${obj.id} received wish: ${JSON.stringify(wish, null, 4)}`);
+        }
+      });
+    }
+  }
+
+  evaluateWhens() {
+    this.whens.forEach(({ condition, action }) => {
+      this.objects.forEach((object) => {
+        if (condition(object)) {
+          action(object);
+        }
+      });
+    });
+  }
+
+  run() {
+    window.requestAnimationFrame(() => {
+      this.evaluateWhens();
+      this.evaluateWishes();
+
+      this.run();
+    });
+  }
+}
+
+// Usage example
+const aardappel = new Runtime();
+
+aardappel.run();
+
+aardappel.createObject((I, runtime) => {
+  I.claim('color', 'red');
+  I.handleWish(
+    wish => "newColor" in wish, 
+    (me, wish) => me.claim("color", wish['newColor'])
+  );
+});
+
+aardappel.createObject((I, runtime) => {
+  I.wish(
+    it => it.claims.has('color'),
+    { newColor: 'blue' }
+  );
+
+  runtime.when(
+    it => it.claims.has('color'),
+    it => console.log(`${it.id} is ${it.claims.get('color')}`)
+  );
+});
+
+</script>
+</body>
+</html>
