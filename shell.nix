@@ -1,11 +1,21 @@
 { pkgs ? import <nixpkgs> {} }:
 
-pkgs.mkShell {
-  buildInputs = [
-    pkgs.bun   
-  ];
+let
+  baseShell = pkgs.mkShell {
+    buildInputs = [
+      pkgs.bun
+    ];
+  };
 
-  shellHook = ''
-    bun server.ts
-  '';
+  maShell = pkgs.mkShell {
+    buildInputs = [
+      pkgs.bun
+    ];
+    shellHook = ''
+      bun server.ts
+    '';
+  };
+in
+baseShell // {
+  ma = maShell;
 }
