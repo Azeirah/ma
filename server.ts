@@ -1,10 +1,10 @@
-import {Ma, MaObject} from "./ma.ts";
+import {Ma} from "./ma.ts";
 
 const ma = new Ma();
 
 ma.run();
 
-ma.createObject((I, runtime) => {
+ma.createObject((I) => {
   I.claim('color', 'red');
   I.handleWish(
     wish => "newColor" in wish, 
@@ -14,12 +14,12 @@ ma.createObject((I, runtime) => {
 
 ma.createObject((I, runtime) => {
   I.wish(
-    it => it.claims.has('color'),
+    it => it.has('color'),
     { newColor: 'blue' }
   );
 
   runtime.when(
-    it => it.claims.has('color'),
-    it => console.log(`${it.id} is ${it.claims.get('color')}`)
+    it => it.has('color'),
+    it => console.log(`${it.id} is ${it.get('color')}`)
   );
 });
