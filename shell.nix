@@ -4,4 +4,8 @@ pkgs.mkShell {
   buildInputs = [
     pkgs.bun   
   ];
+
+  shellHook = ''
+    bun server.ts
+  '';
 }
