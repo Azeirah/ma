@@ -10,6 +10,9 @@ type Wish = { sender: MaObject; patternFn: MaObjectMatcher; wish: WishMessage };
 type MaObjectMatcher = (it: MaObject) => boolean;
 type MaAction = (it: MaObject[]) => void;
 
+export const ALIVE = Symbol("ALIVE");
+let GLOBAL_ID_COUNTER = 0;
+
 export class MaObject {
   protected claimsCollection: Map<any, any>;
   private wishHandlers: Map<
@@ -26,10 +29,12 @@ export class MaObject {
 
   constructor(
     public id: string,
-    private runtime: Ma | null,
+    private runtime: Ma | null
   ) {
     this.claimsCollection = new Map();
     this.wishHandlers = new Map();
+
+    this["ALIVE"] = true;
   }
 
   am(name: string) {
@@ -86,8 +91,6 @@ export class MaObject {
   get(key: string) {
     return this.claimsCollection.get(key);
   }
-
-  destroy() {}
 }
 
 type When = {
@@ -109,11 +112,23 @@ export class Ma extends MaObject {
     });
   }
 
+  disableObject(id: number) {
+    this.claimsCollection.get("objects")[id][ALIVE] = false;
+  }
+
+  enableObject(id: number) {
+    this.claimsCollection.get("objects")[id][ALIVE] = true;
+  }
+
   async createObject(program: (I: MaObject, ma: Ma) => void) {
-    const id = await generateUniqueHash(16);
+    const id = GLOBAL_ID_COUNTER;
     const obj = new MaObject(id, this);
+
     this.get("objects")[id] = obj;
+
     program(obj, this);
+
+    GLOBAL_ID_COUNTER += 1;
     return obj;
   }
 
@@ -144,7 +159,7 @@ export class Ma extends MaObject {
       const { sender, patternFn, wish } = this.get("wishQueue").pop() as Wish;
       const objects = Object.values(this.get("objects")) as MaObject[];
       for (const obj of objects) {
-        if (patternFn(obj)) {
+        if (obj[ALIVE] && patternFn(obj)) {
           obj.receiveWish(sender, wish);
         }
       }
@@ -159,7 +174,7 @@ export class Ma extends MaObject {
       { condition, action, hashedMatches },
     ] of Object.entries(whens)) {
       const objects = Object.values(this.get("objects")) as MaObject[];
-      const matches = objects.filter(condition);
+      const matches = objects.filter(obj => obj[ALIVE]).filter(condition);
       const unique = hash(matches.map(({ id }) => id).join(""));
 
       if (unique !== hashedMatches) {
