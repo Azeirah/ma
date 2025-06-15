@@ -20,9 +20,13 @@ export class MaObject {
     }
   >;
 
+  _____overrideIdentity(id: string) {
+    this.id = id;
+  }
+
   constructor(
     public id: string,
-    private runtime: Ma | null
+    private runtime: Ma | null,
   ) {
     this.claimsCollection = new Map();
     this.wishHandlers = new Map();
@@ -48,6 +52,10 @@ export class MaObject {
     this.claim(key, value);
   }
 
+  getClaimNames() {
+    return [...this.claimsCollection.keys()];
+  }
+
   updateClaim(key: string, updateFn: (prevValue: any) => any) {
     this.claim(key, updateFn(this.get(key)));
   }
@@ -59,7 +67,7 @@ export class MaObject {
   receiveWish(sender: MaObject, wish: WishMessage) {
     this.wishHandlers.forEach(({ patternFn, handler }) => {
       if (patternFn(wish)) {
-        console.log(`${this.id} received a wish from ${sender.id}`);
+        // console.log(`${this.id} received a wish from ${sender.id}`);
         handler(this, wish);
       }
     });
