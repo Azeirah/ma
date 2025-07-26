@@ -1,5 +1,7 @@
 # Ma
 
+> Ma (間, lit. 'gap, space, pause') is a Japanese concept of negative space, and a Japanese reading of the Sino-Japanese character 間.
+
 ## Dependencies
 
 - docker
