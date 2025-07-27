@@ -20,6 +20,7 @@
         };
         python =
           pkgs.python3.withPackages (ps: with ps; [ opencv4 numpy redis ]);
+        hyprlandPkgs = if pkgs.stdenv.isLinux then [pkgs.hyprland] else [];
       in {
         devShells.default = pkgs.mkShell rec {
           buildInputs = [
@@ -30,8 +31,7 @@
             pkgs.gtk2
             pkgs.pkg-config
             pkgs.nodejs
-            pkgs.hyprland
-          ];
+          ] ++ hyprlandPkgs;
           packages = [ pkgs.bun python ];
           LD_LIBRARY_PATH = "${pkgs.lib.makeLibraryPath buildInputs}";
           shellHook = ''
