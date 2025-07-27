@@ -4,7 +4,7 @@ import { createClient } from "redis";
 export const ma = new Ma();
 ma.run();
 
-await ma.createObject(I => {
+await ma.createObject(1, I => {
   I.am("Color swatch");
   I.claim("color", "red");
 
@@ -17,7 +17,7 @@ await ma.createObject(I => {
   );
 });
 
-await ma.createObject((I, ma) => {
+await ma.createObject(2, (I, ma) => {
   const colors = [
     "red",
     "green",
@@ -38,53 +38,53 @@ await ma.createObject((I, ma) => {
   }, 2000);
 });
 
-await ma.createObject(async (I, ma) => {
-  I.am("The identity manager");
+// await ma.createObject(3, async (I, ma) => {
+//   I.am("The identity manager");
 
-  const client = createClient({ url: "redis://localhost:6380" }).on(
-    "error",
-    err => console.error(err)
-  );
+//   const client = createClient({ url: "redis://localhost:6380" }).on(
+//     "error",
+//     err => console.error(err)
+//   );
 
-  await client.connect();
-  const info = await client.info("server");
-  console.log("Connected to redis", info);
+//   await client.connect();
+//   const info = await client.info("server");
+//   console.log("Connected to redis", info);
 
-  I.claim("identities", []);
+//   I.claim("identities", []);
 
-  const kernelIds = ma.get("objects");
-  console.log(
-    "Living objects in the kernel",
-    Object.values(kernelIds).map(o => o.id + " " + o.get("name"))
-  );
+//   const kernelIds = ma.get("objects");
+//   console.log(
+//     "Living objects in the kernel",
+//     Object.values(kernelIds).map(o => o.id + " " + o.get("name"))
+//   );
 
-  await client.subscribe("identity", (message, channel) => {
-    const kernelIds = ma.get("objects");
-    const messageIds = JSON.parse(message).map(o => o.id);
+//   await client.subscribe("identity", (message, channel) => {
+//     const kernelIds = ma.get("objects");
+//     const messageIds = JSON.parse(message).map(o => o.id);
 
-    for (const previousTickAlive of Object.values(kernelIds)) {
-      //
-      if (
-        !messageIds.includes(previousTickAlive.id) &&
-        previousTickAlive[ALIVE]
-      ) {
-        // console.log(`Id ${previousTickAlive.id} left, disabling it`);
-        ma.disableObject(previousTickAlive.id);
-      }
-    }
+//     for (const previousTickAlive of Object.values(kernelIds)) {
+//       //
+//       if (
+//         !messageIds.includes(previousTickAlive.id) &&
+//         previousTickAlive[ALIVE]
+//       ) {
+//         // console.log(`Id ${previousTickAlive.id} left, disabling it`);
+//         ma.disableObject(previousTickAlive.id);
+//       }
+//     }
 
-    for (const nowAlive of messageIds) {
-      if (kernelIds.hasOwnProperty(nowAlive) && !kernelIds[nowAlive][ALIVE]) {
-        // console.log(`Id ${nowAlive} entered, enabling it`);
-        ma.enableObject(nowAlive);
-      }
-    }
+//     for (const nowAlive of messageIds) {
+//       if (kernelIds.hasOwnProperty(nowAlive) && !kernelIds[nowAlive][ALIVE]) {
+//         // console.log(`Id ${nowAlive} entered, enabling it`);
+//         ma.enableObject(nowAlive);
+//       }
+//     }
 
-    //
-    // for (const nowAlive of aliveIds) {
-    //   if (!alive.includes(nowAlive)) {
-    //
-    //   }
-    // }
-  });
-});
+//     //
+//     // for (const nowAlive of aliveIds) {
+//     //   if (!alive.includes(nowAlive)) {
+//     //
+//     //   }
+//     // }
+//   });
+// });

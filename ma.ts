@@ -11,7 +11,6 @@ type MaObjectMatcher = (it: MaObject) => boolean;
 type MaAction = (it: MaObject[]) => void;
 
 export const ALIVE = Symbol("ALIVE");
-let GLOBAL_ID_COUNTER = 0;
 
 export class MaObject {
   protected claimsCollection: Map<any, any>;
@@ -34,7 +33,7 @@ export class MaObject {
     this.claimsCollection = new Map();
     this.wishHandlers = new Map();
 
-    this["ALIVE"] = true;
+    this[ALIVE] = true;
   }
 
   am(name: string) {
@@ -120,15 +119,13 @@ export class Ma extends MaObject {
     this.claimsCollection.get("objects")[id][ALIVE] = true;
   }
 
-  async createObject(program: (I: MaObject, ma: Ma) => void) {
-    const id = GLOBAL_ID_COUNTER;
+  async createObject(id: number, program: (I: MaObject, ma: Ma) => void) {
     const obj = new MaObject(id, this);
 
     this.get("objects")[id] = obj;
 
     program(obj, this);
 
-    GLOBAL_ID_COUNTER += 1;
     return obj;
   }
 
