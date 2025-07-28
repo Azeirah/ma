@@ -29,7 +29,35 @@ The core idea is that you can give real-world things (objects) the space to ask 
 
 With these concepts combined together, it's actually surprisingly easy to get a system together that exhibits interesting behavior!
 
-### Technical details
+## How does Ma connect objects in the rear world with computational objects?
+
+Ma can recognize real-world objects with a camera. It does this by recognizing [aruco tags](https://docs.opencv.org/4.x/d5/dae/tutorial_aruco_detection.html). An aruco tag is similar to a barcode or QR code. It's simply nothing more than a visual marker encoding a number. So for example, one aruco tag could mean "267" and another could be "5". That's it.
+
+The part of the code that recognizes tags is the python code in the `arucam` folder.
+
+When a particular aruco tag is visible, the same program with that ID is "active" or "alive", meaning its code gets _executed_.
+
+If you look at the code to create an object, you can see that there is an ID passed to the object. The "1" passed as the first argument to `ma.createObject` is the ID of the "color swatch" object.
+
+```ts
+await ma.createObject(1, I => {
+  I.am("Color swatch");
+  I.claim("color", "red");
+
+  I.handleWish(
+    wish => "newColor" in wish,
+    (me, wish) => {
+      me.claim("color", wish["newColor"]);
+      console.log(`I changed color to ${I.get("color")}`);
+    }
+  );
+});
+```
+
+Aruco tags have different dictionaries, we use the 4x4 1000 dictionary. This is important for when you generate aruco tags.
+You can generate (and print) aruco tags using [this linked site](https://chev.me/arucogen/)
+
+## Technical details
 
 Realtalk, and by extension Ma, is a [_reactive programming system_](https://en.wikipedia.org/wiki/Reactive_programming), which means it functions similarly to Excel in that changes propagate automatically throughout the system.
 

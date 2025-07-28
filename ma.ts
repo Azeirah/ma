@@ -28,12 +28,13 @@ export class MaObject {
 
   constructor(
     public id: string,
-    private runtime: Ma | null
+    private runtime: Ma | null,
+    alive: boolean = false
   ) {
     this.claimsCollection = new Map();
     this.wishHandlers = new Map();
 
-    this[ALIVE] = true;
+    this[ALIVE] = alive;
   }
 
   am(name: string) {
@@ -116,15 +117,21 @@ export class Ma extends MaObject {
   }
 
   enableObject(id: number) {
-    this.claimsCollection.get("objects")[id][ALIVE] = true;
+    const obj = this.claimsCollection.get("objects")[id];
+    obj[ALIVE] = true;
+
+    obj.program.call(obj, obj, this);
   }
 
-  async createObject(id: number, program: (I: MaObject, ma: Ma) => void) {
-    const obj = new MaObject(id, this);
+  async createObject(id: number, program: (I: MaObject, ma: Ma) => void, alive: boolean) {
+    const obj = new MaObject(id, this, alive);
+    obj.program = program;
 
     this.get("objects")[id] = obj;
 
-    program(obj, this);
+    if (alive) {
+        program(obj, this);
+    }
 
     return obj;
   }

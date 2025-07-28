@@ -31,7 +31,8 @@ a =id= a => true        // Something is identical to itself
 # Basic personality axioms (as established)
 a  =p= a  => true            // Something has same total personality as itself (if unchanged)
 a  =p= a' => false           // Something differs from changed self
-a' =p= a && a =p= a'=> false // Personality changes are symmetric
+a' =p= a => false 
+a  =p= a' => false            // Personality changes are symmetric
 a  =p= b  => false           // Different identities never share total personality
 
 # Parametric personality axioms
@@ -47,7 +48,7 @@ a =p[c]=   b[c]  => false    // Even if two different objects have same value fo
 ## It is important to note that it is a CHOICE 
 ## to say that undefined claims are considered equal
 ## because our equality operators are meant to track changes over time
-{
+
 a.b;a.c;
 a =p[d]= a     => true    // An undefined claim remains true to itself.
 a =p[c]= b     => false   // different identities still not equal even with same undefined claim
