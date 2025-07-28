@@ -80,3 +80,8 @@ That's all! The system is live now.
 
 - [Notes from Dynamicland by Omar Rizwan](https://omar.website/posts/notes-from-dynamicland-geokit/) - This serves as a great introduction to the technical ideas in Dynamicland and Realtalk
 - [Online aruco tags generator](https://chev.me/arucogen/)
+
+## Related projects
+
+- [folk.computer](https://folk.computer/) - Open-source dynamicland-like programming system by Omar Rizwan, [click here](https://github.com/FolkComputer/folk?tab=readme-ov-file#folk) to go to their Github
+- [Adventures in Dynamicland](https://deosjr.github.io/dynamicland/) - Someone experiments with their own implementation of dynamicland programming concepts.
