@@ -57,7 +57,6 @@ await ma.createObject(1, async (I, ma) => {
   });
 }, true);
 
-
 await ma.createObject(2, I => {
   I.am("Color swatch");
   I.claim("color", "red");
@@ -94,16 +93,12 @@ await ma.createObject(3, (I, ma) => {
   }, 2000);
 });
 
-await ma.createObject(4, I => {
+await ma.createObject(5, I => {
   I.am("Window mover");
-  setInterval(function () {
-    if (I[ALIVE] && I.has('position')) {
-      let position = I.get('position')[0];
-      console.log(`hyprctl dispatch movewindowpixel exact ${position[0]} ${position[1]}, activewindow`);
-
-     exec(`hyprctl dispatch movewindowpixel exact ${position[0]} ${position[1]}, activewindow`)
-    }
-  }, 100);
+  ma.when((obj) => obj.has('position') && obj === I, (obj) => {
+    let position = I.get('position')[0];
+    exec(`hyprctl dispatch movewindowpixel exact ${position[0]} ${position[1]}, activewindow`)
+  });
 });
 
 

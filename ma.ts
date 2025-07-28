@@ -62,7 +62,11 @@ export class MaObject {
   }
 
   updateClaim(key: string, updateFn: (prevValue: any) => any) {
+    const before = this.get(key);
+    const after = updateFn(before);
+
     this.claim(key, updateFn(this.get(key)));
+    this.runtime?.claimUpdated(this, key, before, after);
   }
 
   handleWish(patternFn: WishMatcher, handler: WishHandler) {
@@ -170,6 +174,35 @@ export class Ma extends MaObject {
     }
   }
 
+  claimUpdated(object, name, beforeValue, afterValue) {
+    // TODO: Maybe change this into a queue that is processed x ticks per second?
+    const whens = this.get("whens") as Record<string, When>;
+
+    // console.log(`Claim ${name} changed for #${object.id}`);
+    // console.log(`Looping through ${Object.keys(whens).length} when statements`);
+
+    for (const [
+      whenHash,
+      { condition, action, hashedMatches },
+    ] of Object.entries(whens)) {
+      const objects = Object.values(this.get("objects")) as MaObject[];
+      const matches = objects.filter(obj => obj[ALIVE]).filter(condition);
+
+      if (matches.length) {
+        action(matches);
+        this.updateClaim("whens", whens => {
+          return {
+            ...whens,
+            [whenHash]: {
+              condition,
+              action
+            },
+          };
+        });
+      }
+    }
+  }
+
   evaluateWhens() {
     const whens = this.get("whens") as Record<string, When>;
 
@@ -199,7 +232,7 @@ export class Ma extends MaObject {
 
   run() {
     setTimeout(() => {
-      this.evaluateWhens();
+      // this.evaluateWhens();
       this.evaluateWishes();
 
       this.run();
